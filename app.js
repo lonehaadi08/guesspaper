@@ -67,7 +67,7 @@ class ExamApp {
                 "section": "A",
                 "text": "Which of the following numbers is an irrational number?",
                 "type": "mcq",
-                "options": ["0.101", "0.202202220.....", "0.1011", "0.121121112..."],
+                "options": ["0.101", "0.202202220.....", "0.1011", "0.121121112"],
                 "answer": "b",
                 "marks": 1
             },
@@ -149,7 +149,7 @@ class ExamApp {
                 "text": "Discriminant of 3x²-2√6x+2=0 is:",
                 "type": "mcq",
                 "options": ["24", "6", "0", "12"],
-                "answer": "b",
+                "answer": "c",
                 "marks": 1
             },
             {
@@ -203,7 +203,7 @@ class ExamApp {
                 "section": "A",
                 "text": "Prime factorization of 1771 is 7 × 11 × 13.",
                 "type": "tf",
-                "answer": ["true", "True", "TRUE"],
+                "answer": ["false", "False", "FALSE"],
                 "marks": 1
             },
             {
