@@ -3,175 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JKBOSE Class 10th Guess Paper</title>
+    <title>JKBOSE Class 10th Boards Exam Test</title>
     <link rel="stylesheet" href="styles.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="container">
-        <!-- Landing Screen -->
-        <div id="landing-screen" class="screen active">
-            <div class="neon-header">
-                <h1 class="glitch" data-text="JKBOSE Class 10th">JKBOSE Class 10th</h1>
-                <h2 class="neon-subtitle">Guess Paper — Most Probable Paper</h2>
-                <h3 class="subject-title">Mathematics Board Exam</h3>
-            </div>
+    <!-- Loading Screen -->
+    <div id="loading" class="loading-screen">
+        <div class="loader"></div>
+        <p>Loading Examination System...</p>
+    </div>
+
+    <!-- Landing Screen -->
+    <div id="landing-screen" class="screen active">
+        <div class="landing-container">
+            <h1 class="neon-text main-title">JKBOSE Class 10th</h1>
+            <h2 class="subtitle">Boards Exam Test</h2>
+            <p class="description">
+                This is a comprehensive guess paper based on the most probable questions 
+                for JKBOSE Class 10th Mathematics Board Examination. The paper contains 
+                20 questions with a total of 20 marks.
+            </p>
+            <button id="start-btn" class="neon-button primary large">Start Examination</button>
+        </div>
+    </div>
+
+    <!-- Preview Screen -->
+    <div id="preview-screen" class="screen">
+        <div class="preview-container">
+            <h2 class="neon-text">Examination Preview</h2>
+
             <div class="description">
-                <p>This is a comprehensive guess paper based on the most probable questions for JKBOSE Class 10th Mathematics Board Examination. The paper contains 20 questions.</p>
+                <p><strong>Examination Structure:</strong></p>
                 <div class="exam-details">
-                    <span class="detail-item">⏱️ Time: 30 Min</span>
-                    <span class="detail-item">📝 Questions: 20</span>
-                    <span class="detail-item">💯 Marks: 20</span>
+                    <div class="detail-item">📝 20 Questions</div>
+                    <div class="detail-item">✅ 15 MCQs + 5 True/False</div>
+                    <div class="detail-item">📊 20 Marks Total</div>
+                    <div class="detail-item">⏱️ No Time Limit</div>
                 </div>
             </div>
-            <button id="start-btn" class="neon-button primary">
-                <span class="btn-text">Start Examination</span>
-                <div class="btn-glow"></div>
-            </button>
-        </div>
 
-        <!-- Preview Screen -->
-        <div id="preview-screen" class="screen">
-            <div class="preview-container">
-                <h2 class="neon-text">Examination Preview</h2>
-                <div class="preview-content blurred">
-                    <div class="preview-question">
-                        <h3>Section A - Multiple Choice Questions</h3>
-                        <p class="blur-text">The difference of two different irrational numbers is...</p>
-                        <div class="preview-options">
-                            <div class="option blur-text">(a) Rational</div>
-                            <div class="option blur-text">(b) Irrational</div>
-                            <div class="option blur-text">(c) Both of above</div>
-                        </div>
+            <div class="preview-content blurred">
+                <div class="preview-question">
+                    <h3>Q1. Which of the following numbers is an irrational number?</h3>
+                    <div class="preview-options">
+                        <div class="option">A) 0.101</div>
+                        <div class="option">B) 0.202202220.....</div>
+                        <div class="option">C) 0.1011</div>
+                        <div class="option">D) 0.121121112...</div>
                     </div>
-                </div>
-                <div class="preview-actions">
-                    <button id="back-to-landing" class="neon-button secondary">Back</button>
-                    <button id="proceed-btn" class="neon-button primary">Proceed to Exam</button>
                 </div>
             </div>
-        </div>
 
-        <!-- Password Screen -->
-        <div id="password-screen" class="screen">
-            <div class="password-container">
-                <h2 class="neon-text">🔒 Authentication Required</h2>
-                <p>Enter the admin password to access the examination:</p>
-                <div class="input-group">
-                    <input type="password" id="password-input" class="neon-input" placeholder="Enter admin password">
-                    <button id="password-submit" class="neon-button primary">Verify</button>
-                </div>
-                <div id="password-error" class="error-message"></div>
-            </div>
-        </div>
+            <p style="text-align: center; color: var(--color-warning); margin: 20px 0;">
+                🔒 Enter password to access full examination
+            </p>
 
-        <!-- Success Animation Screen -->
-        <div id="success-screen" class="screen">
-            <div class="success-container">
-                <div class="fireworks"></div>
-                <div class="flowers">🌸🌼🌺🌻🌷</div>
-                <h2 class="success-message neon-text">🎉 Access Granted! 🎉</h2>
-                <p class="congratulations">Congratulations! You are authorized to take this examination.</p>
-                <button id="begin-paper-btn" class="neon-button primary pulse">Begin Paper</button>
-            </div>
-        </div>
-
-        <!-- Candidate Details Screen -->
-        <div id="details-screen" class="screen">
-            <div class="details-container">
-                <h2 class="neon-text">📋 Candidate Details</h2>
-                <p>Please fill in your details before starting the examination:</p>
-                <form id="candidate-form" class="details-form">
-                    <div class="input-group">
-                        <label for="full-name">Full Name *</label>
-                        <input type="text" id="full-name" name="fullName" class="neon-input" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="phone">Phone Number *</label>
-                        <input type="tel" id="phone" name="phone" class="neon-input" pattern="[0-9]{10}" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="email">Email Address *</label>
-                        <input type="email" id="email" name="email" class="neon-input" required>
-                    </div>
-                    <div class="input-group">
-                        <label for="address">Address *</label>
-                        <textarea id="address" name="address" class="neon-input" rows="3" required></textarea>
-                    </div>
-                    <div class="input-group">
-                        <label for="roll-number">Roll Number *</label>
-                        <input type="text" id="roll-number" name="rollNumber" class="neon-input" pattern="[0-9]{4}" maxlength="4" required>
-                    </div>
-                    <button type="submit" class="neon-button primary">Start Examination</button>
-                </form>
-                <div id="details-error" class="error-message"></div>
-            </div>
-        </div>
-
-        <!-- Examination Screen -->
-        <div id="exam-screen" class="screen">
-            <div class="exam-container">
-                <div class="exam-header">
-                    <div class="progress-bar">
-                        <div id="progress-fill" class="progress-fill"></div>
-                    </div>
-                    <div class="question-info">
-                        <span id="question-counter">Question 1 of 20</span>
-                        <span id="section-info">Section A</span>
-                    </div>
-                </div>
-                
-                <div id="question-content" class="question-container">
-                    <!-- Questions will be loaded dynamically -->
-                </div>
-
-                <div class="exam-actions">
-                    <button id="prev-btn" class="neon-button secondary" disabled>Previous</button>
-                    <button id="next-btn" class="neon-button primary">Save & Next</button>
-                    <button id="submit-btn" class="neon-button danger" style="display: none;">Submit Exam</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Results Screen -->
-        <div id="results-screen" class="screen">
-            <div class="results-container">
-                <div class="results-header">
-                    <h2 class="neon-text">🎯 Examination Completed!</h2>
-                </div>
-                    
-                    <div class="encoded-result">
-                        <h3>Encoded Result (For Admin)</h3>
-                        <div class="encoded-box">
-                            <code id="encoded-marks">xx</code>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="results-actions">
-                    <button id="whatsapp-btn" class="neon-button success">📱 Send Result via WhatsApp</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Blocked Screen -->
-        <div id="blocked-screen" class="screen">
-            <div class="blocked-container">
-                <h2 class="neon-text error-glow">🚫 Access Denied</h2>
-                <div class="blocked-message">
-                    <p id="blocked-reason">This roll number has already taken the examination.</p>
-                    <div class="blocked-icon">⚠️</div>
-                </div>
+            <div class="preview-actions">
+                <button id="back-to-landing" class="neon-button secondary">← Back</button>
+                <button id="proceed-btn" class="neon-button primary">Proceed to Exam</button>
             </div>
         </div>
     </div>
 
-    <!-- Loading Screen -->
-    <div id="loading" class="loading-screen">
-        <div class="loading-spinner"></div>
-        <p class="loading-text">Loading examination...</p>
+    <!-- Password Screen -->
+    <div id="password-screen" class="screen">
+        <div class="password-container">
+            <h2 class="neon-text">🔐 Access Control</h2>
+            <p>Enter the admin password to access the examination:</p>
+
+            <div class="input-group">
+                <label for="password-input">Password</label>
+                <input type="password" id="password-input" class="neon-input" placeholder="Enter password">
+            </div>
+
+            <button id="password-submit" class="neon-button primary full-width">Verify Access</button>
+            <div id="password-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Success Screen -->
+    <div id="success-screen" class="screen">
+        <div class="success-container">
+            <div class="fireworks">🎆🎇✨🎉🎊</div>
+            <h2 class="success-message">Access Granted!</h2>
+            <div id="role-display" class="neon-text"></div>
+            <div class="flowers">🌸🌺🌼🌻🌷</div>
+            <p class="congratulations">Congratulations! You are authorized to take this examination.</p>
+            <button id="begin-paper-btn" class="neon-button primary large">Begin Paper</button>
+        </div>
+    </div>
+
+    <!-- Details Screen -->
+    <div id="details-screen" class="screen">
+        <div class="details-container">
+            <h2 class="neon-text">Student Details</h2>
+            <p>Please fill in your details before starting the examination:</p>
+
+            <form id="candidate-form">
+                <div class="input-group">
+                    <label for="full-name">Full Name *</label>
+                    <input type="text" id="full-name" name="fullName" class="neon-input" required>
+                </div>
+                <div class="input-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" class="neon-input" pattern="[0-9]{10}" maxlength="10" required>
+                </div>
+                <div class="input-group">
+                    <label for="email">Email Address *</label>
+                    <input type="email" id="email" name="email" class="neon-input" required>
+                </div>
+                <div class="input-group">
+                    <label for="address">Address *</label>
+                    <textarea id="address" name="address" class="neon-input" rows="3" required></textarea>
+                </div>
+                <div class="input-group">
+                    <label for="roll-number">Roll Number *</label>
+                    <input type="text" id="roll-number" name="rollNumber" class="neon-input" pattern="[0-9]{4}" maxlength="4" required>
+                </div>
+                <button type="submit" class="neon-button primary">Start Examination</button>
+            </form>
+            <div id="details-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Examination Screen -->
+    <div id="exam-screen" class="screen">
+        <div class="exam-container">
+            <div class="exam-header">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <div class="question-info">
+                    <span id="question-counter">Question 1 of 20</span>
+                    <span id="section-info">Section A</span>
+                </div>
+            </div>
+
+            <div id="question-content" class="question-container">
+                <!-- Questions will be loaded dynamically -->
+            </div>
+
+            <div class="exam-actions">
+                <button id="prev-btn" class="neon-button secondary" disabled>Previous</button>
+                <button id="next-btn" class="neon-button primary">Save & Next</button>
+                <button id="submit-btn" class="neon-button danger" style="display: none;">Submit Exam</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Results Screen -->
+    <div id="results-screen" class="screen">
+        <div class="results-container">
+            <div class="results-header">
+                <h2 class="neon-text">🎯 Examination Completed!</h2>
+            </div>
+
+            <div class="encoded-result">
+                <h3>Encoded Result (For Admin)</h3>
+                <div class="encoded-box">
+                    <code id="encoded-marks">xx</code>
+                </div>
+            </div>
+
+            <div class="results-actions">
+                <button id="whatsapp-btn" class="neon-button success">📱 Send Result via WhatsApp</button>
+                <button id="get-certificate-btn" class="neon-button primary" style="display: none;">
+                    🎓 Get Your Certificate
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Certificate Code Screen -->
+    <div id="certificate-code-screen" class="screen">
+        <div class="password-container">
+            <h2 class="neon-text">🎓 Certificate Verification</h2>
+            <p>Enter the certificate code provided by your examiner:</p>
+            <p class="hint-text">💡 Hint: The examiner will give you this 3-letter certificate code</p>
+
+            <div class="input-group">
+                <label for="certificate-code-input">Certificate Code</label>
+                <input 
+                    type="text" 
+                    id="certificate-code-input" 
+                    class="neon-input" 
+                    placeholder="e.g., rty" 
+                    maxlength="3"
+                    style="text-transform: lowercase;">
+            </div>
+
+            <button id="certificate-submit" class="neon-button primary full-width">Verify & Get Certificate</button>
+            <div id="certificate-error" class="error-message"></div>
+        </div>
+    </div>
+
+    <!-- Certificate Screen -->
+    <div id="certificate-screen" class="screen">
+        <div id="certificate-container">
+            <!-- Certificate will be generated dynamically -->
+        </div>
+    </div>
+
+    <!-- Blocked Screen -->
+    <div id="blocked-screen" class="screen">
+        <div class="blocked-container">
+            <h2 class="neon-text">🚫 Access Denied</h2>
+            <p id="blocked-message">This roll number has already taken the examination.</p>
+        </div>
     </div>
 
     <script src="app.js"></script>
