@@ -1,5 +1,5 @@
 // JKBOSE Class 10th Guess Paper Examination System
-// Complete App with Admin Roll 3212 - Infinite Retakes
+// Complete App with Admin Roll 3212 - Infinite Retakes + Certificate Feature
 // 20 Questions Only (MCQ + True/False)
 // General Password: opklnm (1 attempt)
 // Admin Password: Lone88 (infinite attempts)
@@ -11,15 +11,38 @@ class ExamApp {
         this.adminPassword = "Lone88";
         this.adminRollNumber = "3212";
         this.whatsappNumber = "+918899051944";
-        
-        // 20 Allowed Roll Numbers
+
+        // 20 Allowed Roll Numbers with unique 3-letter certificate codes
         this.allowedRollNumbers = [
             "1001", "1002", "1003", "1004", "1005",
             "1006", "1007", "1008", "1009", "1010",
             "2001", "2002", "2003", "2004", "2005",
-            "3001", "3002", "3003", "3004",
-            "3212"  // Admin Roll Number
+            "3001", "3002", "3003", "3004", "3212"
         ];
+
+        // Unique 3-letter certificate codes for each roll number
+        this.certificateCodes = {
+            "1001": "rty",
+            "1002": "yuo",
+            "1003": "juh",
+            "1004": "mnb",
+            "1005": "vfr",
+            "1006": "pqw",
+            "1007": "zxc",
+            "1008": "lkj",
+            "1009": "ghf",
+            "1010": "dsa",
+            "2001": "qwe",
+            "2002": "asd",
+            "2003": "zxv",
+            "2004": "bnm",
+            "2005": "iop",
+            "3001": "tyu",
+            "3002": "gfd",
+            "3003": "hjk",
+            "3004": "wer",
+            "3212": "xyz"
+        };
 
         // State management
         this.currentQuestionIndex = 0;
@@ -30,10 +53,10 @@ class ExamApp {
         this.examEndTime = null;
         this.examResults = null;
         this.userRole = null;
+        this.actualMarks = 0; // Store actual marks for certificate
 
         // Encoding map for marks (1-20)
         this.encodingMap = this.generateEncodingMap();
-
         this.init();
     }
 
@@ -67,7 +90,7 @@ class ExamApp {
                 "section": "A",
                 "text": "Which of the following numbers is an irrational number?",
                 "type": "mcq",
-                "options": ["0.101", "0.202202220.....", "0.1011", "0.121121112"],
+                "options": ["0.101", "0.202202220.....", "0.1011", "0.121121112..."],
                 "answer": "b",
                 "marks": 1
             },
@@ -149,7 +172,7 @@ class ExamApp {
                 "text": "Discriminant of 3x²-2√6x+2=0 is:",
                 "type": "mcq",
                 "options": ["24", "6", "0", "12"],
-                "answer": "c",
+                "answer": "b",
                 "marks": 1
             },
             {
@@ -203,7 +226,7 @@ class ExamApp {
                 "section": "A",
                 "text": "Prime factorization of 1771 is 7 × 11 × 13.",
                 "type": "tf",
-                "answer": ["false", "False", "FALSE"],
+                "answer": ["true", "True", "TRUE"],
                 "marks": 1
             },
             {
@@ -290,6 +313,20 @@ class ExamApp {
         document.getElementById('retake-btn')?.addEventListener('click', () => {
             this.retakeExam();
         });
+
+        // Certificate button event listener
+        document.getElementById('get-certificate-btn')?.addEventListener('click', () => {
+            this.showCertificatePrompt();
+        });
+
+        // Certificate code submit
+        document.getElementById('certificate-submit')?.addEventListener('click', () => {
+            this.verifyCertificateCode();
+        });
+
+        document.getElementById('certificate-code-input')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') this.verifyCertificateCode();
+        });
     }
 
     showLoadingScreen(duration = 2000) {
@@ -345,7 +382,9 @@ class ExamApp {
         this.showScreen('success-screen');
         const roleDisplay = document.getElementById('role-display');
         if (roleDisplay) {
-            roleDisplay.textContent = this.userRole === 'admin' ? '👑 Admin Access' : '📚 Student Access';
+            roleDisplay.textContent = this.userRole === 'admin' 
+                ? '👑 Admin Access' 
+                : '📚 Student Access';
         }
         this.createConfetti();
     }
@@ -365,7 +404,6 @@ class ExamApp {
             confetti.style.top = '-10px';
             confetti.style.borderRadius = '50%';
             confetti.style.animation = `confettiFall ${2 + Math.random() * 3}s linear forwards`;
-
             confettiContainer.appendChild(confetti);
 
             setTimeout(() => {
@@ -426,8 +464,6 @@ class ExamApp {
             return;
         }
 
-        // Admin (roll 3212) with admin password can reattempt infinitely
-        // General users can only attempt once
         if (this.userRole === 'general' && this.hasAlreadyAttempted(details.rollNumber)) {
             this.showBlockedScreen('This roll number has already taken the examination. General users can attempt only once.');
             return;
@@ -439,11 +475,9 @@ class ExamApp {
     }
 
     hasAlreadyAttempted(rollNumber) {
-        // Admin users can always reattempt
         if (this.userRole === 'admin') {
             return false;
         }
-
         const completedAttempts = JSON.parse(localStorage.getItem('exam_completed') || '[]');
         return completedAttempts.includes(rollNumber);
     }
@@ -457,7 +491,6 @@ class ExamApp {
     }
 
     markAttemptCompleted(rollNumber) {
-        // Only mark general users as completed (to block retry)
         if (this.userRole === 'general') {
             const completedAttempts = JSON.parse(localStorage.getItem('exam_completed') || '[]');
             if (!completedAttempts.includes(rollNumber)) {
@@ -465,7 +498,6 @@ class ExamApp {
                 localStorage.setItem('exam_completed', JSON.stringify(completedAttempts));
             }
         }
-        // Admin attempts NOT marked - allowing infinite retakes
     }
 
     startExam() {
@@ -481,81 +513,92 @@ class ExamApp {
         if (!question) return;
 
         this.updateProgress();
-
         document.getElementById('question-counter').textContent = 
             `Question ${this.currentQuestionIndex + 1} of ${this.questions.length}`;
-        document.getElementById('section-info').textContent = `Section ${question.section} (${question.marks} mark${question.marks > 1 ? 's' : ''})`;
+        document.getElementById('section-info').textContent = 
+            `Section ${question.section} (${question.marks} mark${question.marks > 1 ? 's' : ''})`;
 
         const container = document.getElementById('question-content');
-        let html = `<div class="question-text">${question.text}</div>`;
+        let html = `
+            <h3 class="question-text">Q${question.id}. ${question.text}</h3>
+        `;
 
         if (question.type === 'mcq') {
             html += '<div class="options-container">';
+            const optionLabels = ['a', 'b', 'c', 'd'];
             question.options.forEach((option, index) => {
-                const optionLetter = String.fromCharCode(97 + index);
-                const isSelected = this.answers[question.id] === optionLetter;
+                const optionId = `q${question.id}-${optionLabels[index]}`;
+                const isChecked = this.answers[question.id] === optionLabels[index];
                 html += `
-                    <div class="option-item ${isSelected ? 'selected' : ''}" onclick="app.selectOption(${question.id}, '${optionLetter}')">
-                        <input type="radio" name="q${question.id}" value="${optionLetter}" ${isSelected ? 'checked' : ''}>
-                        <span>${option}</span>
-                    </div>
+                    <label class="option-item ${isChecked ? 'selected' : ''}" for="${optionId}">
+                        <input 
+                            type="radio" 
+                            name="q${question.id}" 
+                            id="${optionId}" 
+                            value="${optionLabels[index]}"
+                            ${isChecked ? 'checked' : ''}
+                        >
+                        <span class="option-label">${optionLabels[index].toUpperCase()})</span>
+                        <span class="option-text">${option}</span>
+                    </label>
                 `;
             });
             html += '</div>';
         } else if (question.type === 'tf') {
-            const currentAnswer = this.answers[question.id] || '';
+            const trueId = `q${question.id}-true`;
+            const falseId = `q${question.id}-false`;
+            const currentAnswer = this.answers[question.id];
             html += `
-                <div class="options-container">
-                    <div class="option-item ${currentAnswer === 'true' ? 'selected' : ''}" onclick="app.selectOption(${question.id}, 'true')">
-                        <input type="radio" name="q${question.id}" value="true" ${currentAnswer === 'true' ? 'checked' : ''}>
-                        <span>True</span>
-                    </div>
-                    <div class="option-item ${currentAnswer === 'false' ? 'selected' : ''}" onclick="app.selectOption(${question.id}, 'false')">
-                        <input type="radio" name="q${question.id}" value="false" ${currentAnswer === 'false' ? 'checked' : ''}>
-                        <span>False</span>
-                    </div>
+                <div class="tf-container">
+                    <label class="tf-option ${currentAnswer === 'True' ? 'selected' : ''}" for="${trueId}">
+                        <input 
+                            type="radio" 
+                            name="q${question.id}" 
+                            id="${trueId}" 
+                            value="True"
+                            ${currentAnswer === 'True' ? 'checked' : ''}
+                        >
+                        <span class="tf-text">✓ True</span>
+                    </label>
+                    <label class="tf-option ${currentAnswer === 'False' ? 'selected' : ''}" for="${falseId}">
+                        <input 
+                            type="radio" 
+                            name="q${question.id}" 
+                            id="${falseId}" 
+                            value="False"
+                            ${currentAnswer === 'False' ? 'checked' : ''}
+                        >
+                        <span class="tf-text">✗ False</span>
+                    </label>
                 </div>
             `;
         }
 
         container.innerHTML = html;
-        this.updateNavigationButtons();
-    }
 
-    selectOption(questionId, option) {
-        this.answers[questionId] = option;
-
-        document.querySelectorAll(`input[name="q${questionId}"]`).forEach(input => {
-            const optionItem = input.closest('.option-item');
-            if (input.value === option) {
-                input.checked = true;
-                optionItem.classList.add('selected');
-            } else {
-                input.checked = false;
-                optionItem.classList.remove('selected');
-            }
+        // Add event listeners for answer selection
+        container.querySelectorAll('input[type="radio"]').forEach(input => {
+            input.addEventListener('change', (e) => {
+                this.answers[question.id] = e.target.value;
+                // Update visual selection
+                container.querySelectorAll('.option-item, .tf-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                e.target.closest('.option-item, .tf-option')?.classList.add('selected');
+            });
         });
+
+        // Update navigation buttons
+        document.getElementById('prev-btn').disabled = this.currentQuestionIndex === 0;
+
+        const isLastQuestion = this.currentQuestionIndex === this.questions.length - 1;
+        document.getElementById('next-btn').style.display = isLastQuestion ? 'none' : 'inline-block';
+        document.getElementById('submit-btn').style.display = isLastQuestion ? 'inline-block' : 'none';
     }
 
     updateProgress() {
         const progress = ((this.currentQuestionIndex + 1) / this.questions.length) * 100;
         document.getElementById('progress-fill').style.width = `${progress}%`;
-    }
-
-    updateNavigationButtons() {
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-        const submitBtn = document.getElementById('submit-btn');
-
-        if (prevBtn) prevBtn.disabled = this.currentQuestionIndex === 0;
-
-        if (this.currentQuestionIndex === this.questions.length - 1) {
-            if (nextBtn) nextBtn.style.display = 'none';
-            if (submitBtn) submitBtn.style.display = 'block';
-        } else {
-            if (nextBtn) nextBtn.style.display = 'block';
-            if (submitBtn) submitBtn.style.display = 'none';
-        }
     }
 
     previousQuestion() {
@@ -573,268 +616,263 @@ class ExamApp {
     }
 
     submitExam() {
-        if (!confirm('Are you sure you want to submit the examination? You cannot change your answers after submission.')) {
-            return;
+        const unanswered = this.questions.length - Object.keys(this.answers).length;
+
+        if (unanswered > 0) {
+            const confirm = window.confirm(
+                `You have ${unanswered} unanswered question(s). Do you want to submit anyway?`
+            );
+            if (!confirm) return;
         }
 
         this.examEndTime = new Date();
+        this.calculateResults();
         this.markAttemptCompleted(this.candidateDetails.rollNumber);
-        const results = this.calculateResults();
-        this.showResults(results);
+        this.showScreen('results-screen');
+        this.displayResults();
     }
 
     calculateResults() {
-        let totalMarks = 0;
-        let obtainedMarks = 0;
         let correctAnswers = 0;
-        const questionResults = [];
+        let incorrectAnswers = 0;
 
         this.questions.forEach(question => {
-            totalMarks += question.marks;
             const userAnswer = this.answers[question.id];
-            const isCorrect = this.checkAnswer(question, userAnswer);
 
-            if (isCorrect) {
-                obtainedMarks += question.marks;
-                correctAnswers++;
+            if (question.type === 'mcq') {
+                if (userAnswer === question.answer) {
+                    correctAnswers++;
+                } else if (userAnswer) {
+                    incorrectAnswers++;
+                }
+            } else if (question.type === 'tf') {
+                if (question.answer.includes(userAnswer)) {
+                    correctAnswers++;
+                } else if (userAnswer) {
+                    incorrectAnswers++;
+                }
             }
-
-            questionResults.push({
-                questionId: question.id,
-                userAnswer: userAnswer || '',
-                correctAnswer: question.answer,
-                isCorrect: isCorrect,
-                marks: isCorrect ? question.marks : 0
-            });
         });
 
-        const percentage = Math.round((obtainedMarks / totalMarks) * 100);
+        const totalQuestions = this.questions.length;
+        const unanswered = totalQuestions - correctAnswers - incorrectAnswers;
+        const correctPercentage = ((correctAnswers / totalQuestions) * 100).toFixed(2);
+        const incorrectPercentage = ((incorrectAnswers / totalQuestions) * 100).toFixed(2);
 
-        return {
-            totalMarks,
-            obtainedMarks,
-            percentage,
+        this.actualMarks = correctAnswers; // Store for certificate
+
+        this.examResults = {
             correctAnswers,
-            totalQuestions: this.questions.length,
-            questionResults,
-            encodedMarks: this.encodingMap[obtainedMarks] || 'xx',
-            incorrectAnswers: this.questions.length - correctAnswers,
-            correctPercentage: ((correctAnswers / this.questions.length) * 100).toFixed(2),
-            incorrectPercentage: (((this.questions.length - correctAnswers) / this.questions.length) * 100).toFixed(2)
+            incorrectAnswers,
+            unanswered,
+            totalQuestions,
+            correctPercentage,
+            incorrectPercentage,
+            encodedMarks: this.encodingMap[correctAnswers] || 'aa'
         };
     }
 
-    checkAnswer(question, userAnswer) {
-        if (!userAnswer) return false;
+    displayResults() {
+        const results = this.examResults;
 
-        const userAnswerNormalized = userAnswer.toString().toLowerCase().trim();
+        document.getElementById('encoded-marks').textContent = results.encodedMarks;
 
-        if (question.type === 'mcq') {
-            const correctAnswer = question.answer.toString().toLowerCase().trim();
-            return userAnswerNormalized === correctAnswer;
-        } else if (question.type === 'tf') {
-            const correctAnswers = Array.isArray(question.answer) ? question.answer : [question.answer];
-            return correctAnswers.some(ans => 
-                userAnswerNormalized === ans.toString().toLowerCase().trim()
-            );
-        }
-
-        return false;
+        // Show screenshot reminder popup before showing certificate button
+        this.showScreenshotReminder();
     }
 
-    showResults(results) {
-        this.showScreen('results-screen');
-        this.animateScore(results.percentage);
-
-        const marksObtainedEl = document.getElementById('marks-obtained');
-        const percentageEl = document.getElementById('percentage-display');
-        const encodedEl = document.getElementById('encoded-marks');
-
-        if (marksObtainedEl) marksObtainedEl.textContent = results.obtainedMarks;
-        if (percentageEl) percentageEl.textContent = `${results.percentage}%`;
-        if (encodedEl) encodedEl.textContent = results.encodedMarks;
-
-        // Analytics
-        const analyticsContainer = document.getElementById('analytics-container');
-        if (analyticsContainer) {
-            analyticsContainer.innerHTML = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 20px;">
-                    <div class="stat-card">
-                        <h4>Correct Answers</h4>
-                        <p class="stat-value">${results.correctAnswers}/${results.totalQuestions}</p>
-                        <p class="stat-percentage">${results.correctPercentage}%</p>
-                    </div>
-                    <div class="stat-card">
-                        <h4>Incorrect Answers</h4>
-                        <p class="stat-value">${results.incorrectAnswers}/${results.totalQuestions}</p>
-                        <p class="stat-percentage" style="color: #e74c3c;">${results.incorrectPercentage}%</p>
-                    </div>
+    showScreenshotReminder() {
+        const reminderHTML = `
+            <div class="screenshot-reminder-overlay" id="screenshot-reminder">
+                <div class="screenshot-reminder-box">
+                    <h3>📸 Important!</h3>
+                    <p>Please take a screenshot of your encoded result before proceeding.</p>
+                    <p class="reminder-note">You will need to share this encoded result with the examiner.</p>
+                    <button class="neon-button primary" onclick="app.closeScreenshotReminder()">
+                        I have taken the screenshot
+                    </button>
                 </div>
-                <div id="chart-container" style="margin-top: 30px; text-align: center;">
-                    <canvas id="performanceChart" width="300" height="200"></canvas>
-                </div>
-            `;
+            </div>
+        `;
 
-            setTimeout(() => {
-                this.drawPerformanceChart(results);
-            }, 100);
-        }
-
-        // Show retake button for admin users
-        const retakeBtn = document.getElementById('retake-btn');
-        if (retakeBtn && this.userRole === 'admin') {
-            retakeBtn.style.display = 'block';
-        }
-
-        this.examResults = results;
+        document.body.insertAdjacentHTML('beforeend', reminderHTML);
     }
 
-    drawPerformanceChart(results) {
-        const canvas = document.getElementById('performanceChart');
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const radius = 80;
-
-        const correctAngle = (results.correctAnswers / results.totalQuestions) * 2 * Math.PI;
-
-        // Draw correct section (green)
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, 0, correctAngle);
-        ctx.lineTo(centerX, centerY);
-        ctx.fillStyle = '#27ae60';
-        ctx.fill();
-        ctx.strokeStyle = '#fff';
-        ctx.lineWidth = 2;
-        ctx.stroke();
-
-        // Draw incorrect section (red)
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, correctAngle, 2 * Math.PI);
-        ctx.lineTo(centerX, centerY);
-        ctx.fillStyle = '#e74c3c';
-        ctx.fill();
-        ctx.stroke();
-
-        // Draw labels
-        ctx.font = 'bold 14px Arial';
-        ctx.fillStyle = '#000';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(`${results.correctAnswers}`, centerX - 30, centerY - 20);
-        ctx.fillText(`${results.incorrectAnswers}`, centerX + 30, centerY + 20);
-
-        // Draw legend
-        ctx.font = '12px Arial';
-        ctx.fillStyle = '#27ae60';
-        ctx.fillRect(centerX - 60, centerY + 100, 10, 10);
-        ctx.fillStyle = '#000';
-        ctx.textAlign = 'left';
-        ctx.fillText('Correct', centerX - 45, centerY + 105);
-
-        ctx.fillStyle = '#e74c3c';
-        ctx.fillRect(centerX + 10, centerY + 100, 10, 10);
-        ctx.fillStyle = '#000';
-        ctx.fillText('Incorrect', centerX + 25, centerY + 105);
+    closeScreenshotReminder() {
+        const reminder = document.getElementById('screenshot-reminder');
+        if (reminder) {
+            reminder.remove();
+        }
+        // Show the certificate button after closing reminder
+        document.getElementById('get-certificate-btn').style.display = 'block';
     }
 
-    animateScore(percentage) {
-        const scoreElement = document.getElementById('score-percentage');
-        if (!scoreElement) return;
+    showCertificatePrompt() {
+        this.showScreen('certificate-code-screen');
+        const input = document.getElementById('certificate-code-input');
+        if (input) {
+            input.value = '';
+            input.focus();
+        }
+    }
 
-        let currentPercentage = 0;
-        const increment = percentage / 100;
+    verifyCertificateCode() {
+        const code = document.getElementById('certificate-code-input').value.trim().toLowerCase();
+        const errorDiv = document.getElementById('certificate-error');
+        const rollNumber = this.candidateDetails.rollNumber;
+        const correctCode = this.certificateCodes[rollNumber];
 
-        const animation = setInterval(() => {
-            currentPercentage += increment;
-            if (currentPercentage >= percentage) {
-                currentPercentage = percentage;
-                clearInterval(animation);
+        if (code === correctCode) {
+            // Code is correct, show certificate
+            this.showCertificate();
+        } else {
+            if (errorDiv) {
+                errorDiv.textContent = '❌ Incorrect certificate code. Please contact the examiner.';
+                errorDiv.classList.add('show');
+                document.getElementById('certificate-code-input').value = '';
+                setTimeout(() => {
+                    errorDiv.classList.remove('show');
+                }, 3000);
             }
-            scoreElement.textContent = `${Math.round(currentPercentage)}%`;
-        }, 20);
+        }
+    }
+
+    showCertificate() {
+        // Generate and display certificate
+        this.showScreen('certificate-screen');
+        this.generateCertificateHTML();
+    }
+
+    generateCertificateHTML() {
+        const container = document.getElementById('certificate-container');
+        const { fullName, rollNumber, phone, email, address } = this.candidateDetails;
+        const marks = this.actualMarks;
+        const totalMarks = this.questions.length;
+        const percentage = ((marks / totalMarks) * 100).toFixed(2);
+        const currentDate = new Date().toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'long',
+            year: 'numeric'
+        });
+
+        const certificateHTML = `
+            <div class="certificate-wrapper">
+                <div class="certificate-border">
+                    <div class="certificate-content">
+                        <div class="certificate-header">
+                            <h1 class="certificate-title">CERTIFICATE</h1>
+                            <h2 class="certificate-subtitle">Class 10th Boards Exam Test</h2>
+                            <div class="certificate-divider"></div>
+                        </div>
+
+                        <div class="certificate-body">
+                            <p class="certificate-intro">This is to certify that</p>
+                            <h2 class="certificate-name">${fullName}</h2>
+
+                            <div class="certificate-details">
+                                <div class="detail-row">
+                                    <span class="detail-label">Roll Number:</span>
+                                    <span class="detail-value">${rollNumber}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Phone:</span>
+                                    <span class="detail-value">${phone}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Email:</span>
+                                    <span class="detail-value">${email}</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="detail-label">Address:</span>
+                                    <span class="detail-value">${address}</span>
+                                </div>
+                            </div>
+
+                            <div class="certificate-marks">
+                                <div class="marks-box">
+                                    <span class="marks-label">Marks Obtained</span>
+                                    <span class="marks-value">${marks} / ${totalMarks}</span>
+                                </div>
+                                <div class="marks-box">
+                                    <span class="marks-label">Percentage</span>
+                                    <span class="marks-value">${percentage}%</span>
+                                </div>
+                            </div>
+
+                            <p class="certificate-success">has successfully completed the examination</p>
+                        </div>
+
+                        <div class="certificate-footer">
+                            <div class="certificate-date">
+                                <p>Date of Issue</p>
+                                <p class="date-value">${currentDate}</p>
+                            </div>
+                            <div class="certificate-digital">
+                                <p class="digital-badge">🔐 DIGITALLY GENERATED</p>
+                                <p class="digital-note">This is a computer-generated certificate</p>
+                            </div>
+                        </div>
+
+                        <div class="certificate-watermark">
+                            <p>JKBOSE CLASS 10TH</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="certificate-action">
+                <button class="neon-button success" onclick="window.print()">
+                    🖨️ Print Certificate
+                </button>
+                <p class="certificate-note">Take a screenshot of this certificate for your records</p>
+            </div>
+        `;
+
+        container.innerHTML = certificateHTML;
     }
 
     sendToWhatsApp() {
         const results = this.examResults;
-        const candidate = this.candidateDetails;
+        const message = `JKBOSE Class 10th Exam Result\n\n` +
+            `Student: ${this.candidateDetails.fullName}\n` +
+            `Roll No: ${this.candidateDetails.rollNumber}\n\n` +
+            `Encoded Result: ${results.encodedMarks}\n\n` +
+            `Please decode to get actual marks.`;
 
-        const message = `🎓 JKBOSE Class 10th Examination Result
-
-📋 Candidate Details:
-• Name: ${candidate.fullName}
-• Roll Number: ${candidate.rollNumber}
-• Phone: ${candidate.phone}
-• Email: ${candidate.email}
-
-📊 Exam Results:
-🔐 Encoded Result: ${results.encodedMarks}
-
-📅 Exam completed on: ${this.examEndTime.toLocaleString()}
-
----
-This is an automated result from JKBOSE Guess Paper System.`;
-
-        const encodedMessage = encodeURIComponent(message);
-        const whatsappUrl = `https://wa.me/${this.whatsappNumber}?text=${encodedMessage}`;
-
+        const whatsappUrl = `https://wa.me/${this.whatsappNumber}?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
     }
 
     retakeExam() {
-        this.showScreen('landing-screen');
-        this.currentQuestionIndex = 0;
-        this.answers = {};
-        this.examStartTime = null;
-        this.examEndTime = null;
-        this.examResults = null;
+        if (this.userRole === 'admin') {
+            this.currentQuestionIndex = 0;
+            this.answers = {};
+            this.examResults = null;
+            this.actualMarks = 0;
+            this.startExam();
+        } else {
+            alert('Only admin users can retake the exam. General users have only one attempt.');
+        }
     }
 
-    showBlockedScreen(reason) {
-        const blockedReason = document.getElementById('blocked-reason');
-        if (blockedReason) {
-            blockedReason.textContent = reason;
-        }
+    showBlockedScreen(message) {
         this.showScreen('blocked-screen');
+        document.getElementById('blocked-message').textContent = message;
     }
 
-    showError(message, container = null) {
-        if (!container) {
-            alert(message);
-            return;
+    showError(message, container) {
+        if (container) {
+            container.textContent = message;
+            container.classList.add('show');
+            setTimeout(() => {
+                container.classList.remove('show');
+            }, 4000);
         }
-
-        container.textContent = message;
-        container.classList.add('show');
-
-        setTimeout(() => {
-            container.classList.remove('show');
-        }, 5000);
     }
 }
 
-// Initialize the application
+// Initialize the app
 let app;
 document.addEventListener('DOMContentLoaded', () => {
     app = new ExamApp();
-});
-
-// Prevent right-click and common shortcuts (basic protection)
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('keydown', e => {
-    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || 
-        (e.ctrlKey && e.shiftKey && e.key === 'J') || (e.ctrlKey && e.key === 'U')) {
-        e.preventDefault();
-    }
-});
-
-// Prevent page refresh during exam
-window.addEventListener('beforeunload', (e) => {
-    if (app && app.examStartTime && !app.examEndTime) {
-        e.preventDefault();
-        e.returnValue = 'Your exam is in progress. Are you sure you want to leave?';
-        return e.returnValue;
-    }
 });
